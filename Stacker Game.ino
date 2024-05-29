@@ -51,8 +51,8 @@ int ledDirection = 1;        // tracks the direction of the LED, 1(right), -1(le
 unsigned char currentDigit = 0;
 
 // global variables here
-enum LEDstates { START, SHIFT, HOLD_LED }; LED_state;
-enum ButtonState { WAIT, PRESS, RELEASE }; B_state;
+enum LEDstates { START, SHIFT, HOLD_LED };
+enum ButtonState { WAIT, PRESS, RELEASE };
 
 struct Stacker {
     unsigned char LEDpos;
@@ -92,42 +92,27 @@ void setup() {
       pinMode(ledPins[i], OUTPUT);
     }
 
-    //TimerSet(120);
-    //TimerOn();
+    TimerSet(120);
+    TimerOn();
 
     pinMode(A0, INPUT_PULLUP);
 }
 
-volatile unsigned char TimerFlag = 0; // debugger says to put volatile?
+//volatile unsigned char TimerFlag = 0; // debugger says to put volatile?
+unsigned long lastUpdate = 0;
+const unsigned long updateInterval = 5; 
 
 void loop() {
-unsigned long lastUpdate = 0;
-const unsigned long updateInterval = 5;
-unsigned long B_elapsedTime = 10;
-unsigned long LED_elapsedTime = 50;
-const unsigned long timerPeriod = 100;
-con
-TimerSet(timerPeriod);
-TimerOn();
-LED_state = START;
-B_state = WAIT;
-  while(1) {
-    TimerFlag = 0;
-    while(!TimerFlag) {}
-    if (B_elapsedTime >= 10) {
-      tick_buttonState();
-      tick_Score();
-      B_elapsedTime = 0;
-    }
-    if (LED_elapsedTime >= 120) {
-      tick_LEDstates();
-      LED_elapsedTime = 0;
-    }
+    while(!TimerFlag) {
+      unsigned long refreshRate = millis();
 
-    B_elapsedTime += timerPeriod;
-    LED_elapsedTime += timerPeriod;
+    if (refreshRate - lastUpdate >= updateInterval) {
+      lastUpdate = refreshRate;
+      updateScoreDisplay(game.score);
+    }
   }
 
+  TimerFlag = 0;
   
   game.buttonPress = digitalRead(A0);
 
